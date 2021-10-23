@@ -21,7 +21,11 @@ contract Lottery {
     }
 
     function getEntanceFee() public  view returns (uint256){
+        (, int256 price, , , ) = priceFeed.latestRoundData();
+        uint256 adjustedPrice = uint256(price) * 10 ** 10; // 18 decimals
 
+        uint256 costToEnter = (usdEntryFee * 10 ** 18) / adjustedPrice;
+        return costToEnter;
     }
 
     function start() public {

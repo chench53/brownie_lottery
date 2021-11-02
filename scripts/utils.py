@@ -1,6 +1,6 @@
-from brownie import MockAggregatorV3, network, config, accounts, Contract
+from brownie import MockAggregatorV3, VRFCoordinatorMock, LinkToken, network, config, accounts, Contract
 
-from scripts.deploy_lottery import deploy
+# from scripts.deploy_lottery import deploy
 
 FORKED_LOCAL_BLOCKCHAIN = ['mainnet-fork', 'mainnet-fork-dev']
 LOCAL_BLOCKCHAIN = ['development', 'ganache-local']
@@ -20,7 +20,9 @@ def get_account(index=None, id=None):
 
 
 contract_to_mock = {
-    "price_feed": MockAggregatorV3
+    "price_feed": MockAggregatorV3,
+    "vrf_coordinator": VRFCoordinatorMock,
+    "link_token": LinkToken
 }
 
 def get_contract(contract_name):
@@ -34,7 +36,7 @@ def get_contract(contract_name):
     contract_type = contract_to_mock[contract_name]
     if network.show_active() in LOCAL_BLOCKCHAIN:
         if len(contract_type) <= 0:
-            deploy_mock()
+            deploy_mock(contract_name)
         contract = contract_type[-1]
 
     else:
@@ -43,13 +45,19 @@ def get_contract(contract_name):
 
     return contract
 
-def deploy_mock():
+def deploy_mock(contract_name):
     account = get_account()
     # if len(MockAggregatorV3) == 0:
-    print('depolying mocks...')
-    mock_aggregator =  MockAggregatorV3.deploy(DECIMALS, STARTING_PRICE, {"from": account})
-    print('mock depolyed at {}'.format(mock_aggregator.address))
-    # else:
-        # mock_aggregator = MockAggregatorV3[-1]
-    # price_feed = mock_aggregator.address
-    # return price_feed
+    print('depolying mocks...{}'.format(contract_name))
+    # contract_type = contract_to_mock[contract_name]
+    if contract_name == "price_feed":
+        MockAggregatorV3.deploy(DECIMALS, STARTING_PRICE, {"from": account})
+    # elif contract_name == "vrf_coordinator":
+    #     VRFCoordinatorMock.deploy({"from": account})
+    # elif contract_name == "link_token":
+    #     LinkToken.deploy({"from": account})
+    else:
+        link_token = LinkToken.deploy({"from": account})
+        VRFCoordinatorMock.deploy(link_token.address, {"from": account})
+    print('mock depolyed {}'.format(contract_name))
+

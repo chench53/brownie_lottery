@@ -3,7 +3,8 @@ from brownie import Lottery, accounts, config, network
 from .utils import get_account, get_contract
 
 def deploy():
-    account = get_account(id="me")
+    # account = get_account(id="me")
+    account = get_account()
     lottery = Lottery.deploy(
         get_contract("price_feed").address, 
         get_contract("vrf_coordinator").address,
@@ -17,5 +18,31 @@ def deploy():
     )
     print("deployed lottery {}".format(lottery.address))
 
+def start_lottery():
+    # account = get_account(id="me")
+    account = get_account()
+    lottery = Lottery[-1]
+    starting_tx = lottery.startLottery({"from": account})
+    starting_tx.wait(1)
+    print("lottery started!")
+
+def enter_lottery():
+    account = get_account()
+    lottery = Lottery[-1]
+    value = lottery.getEntanceFee() + 100000000
+    tx = lottery.enter({"from": account, "value": value})
+    tx.wait(1)
+    print("you enter lottery!")
+
+def end_lottery():
+    account = get_account()
+    lottery = Lottery[-1]
+    # fund contract link
+    tx = lottery.endLottery({"from": account})
+    tx.wait(1)
+    print("lottery end!")
+
 def main():
     deploy()
+    start_lottery()
+    enter_lottery()

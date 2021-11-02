@@ -52,12 +52,15 @@ def deploy_mock(contract_name):
     # contract_type = contract_to_mock[contract_name]
     if contract_name == "price_feed":
         MockAggregatorV3.deploy(DECIMALS, STARTING_PRICE, {"from": account})
-    # elif contract_name == "vrf_coordinator":
-    #     VRFCoordinatorMock.deploy({"from": account})
-    # elif contract_name == "link_token":
-    #     LinkToken.deploy({"from": account})
     else:
         link_token = LinkToken.deploy({"from": account})
         VRFCoordinatorMock.deploy(link_token.address, {"from": account})
-    print('mock depolyed {}'.format(contract_name))
+    # print('mock depolyed {}'.format(contract_name))
 
+def fund_with_link(contract_address, account=None, link_token=None, amount=100000000000000000): # 0.1lnk
+    account = account if account else  get_account()
+    link_token = link_token if link_token else get_contract("link_token")
+    # tx = link_token.transfer(contract_address, amount, {"from": account})
+    tx.wait(1)
+    print("fund contract!")
+    return tx

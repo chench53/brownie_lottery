@@ -15,7 +15,7 @@ FORKED_LOCAL_BLOCKCHAIN = ['mainnet-fork', 'mainnet-fork-dev']
 LOCAL_BLOCKCHAIN = ['development', 'ganache-local']
 
 DECIMALS = 8
-STARTING_PRICE = 400000000000
+STARTING_PRICE = 200000000000
 
 def get_account(index=None, id=None):
     if index:

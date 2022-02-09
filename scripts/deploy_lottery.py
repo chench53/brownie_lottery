@@ -19,6 +19,7 @@ def deploy():
         publish_source = config["networks"][network.show_active()].get("verify", False)
     )
     print("deployed lottery {}".format(lottery.address))
+    return lottery
 
 def start_lottery():
     # account = get_account(id="me")

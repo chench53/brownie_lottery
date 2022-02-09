@@ -10,3 +10,5 @@ compile
 `brownie compile`
 run
 `brownie run scripts/deploy_lottery.py`
+test
+`brownie test -k test_get_entrance_fee`

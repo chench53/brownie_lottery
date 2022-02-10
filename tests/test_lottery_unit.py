@@ -4,7 +4,12 @@ import pytest
 from web3 import Web3
 
 from scripts.deploy_lottery import deploy
-from scripts.utils import fund_with_link, get_account, LOCAL_BLOCKCHAIN
+from scripts.utils import (
+    fund_with_link, 
+    get_account, 
+    get_contract, 
+    LOCAL_BLOCKCHAIN
+)
 
 def test_get_entrance_fee():
     """
@@ -52,3 +57,28 @@ def test_can_end_lottery():
     fund_with_link(lottery)
     lottery.endLottery({"from": account})
     assert lottery.lottery_state() == 2
+
+def test_can_pick_winner_correctly():
+    if network.show_active() not in LOCAL_BLOCKCHAIN:
+        pytest.skip()
+    lottery = deploy()
+    account = get_account()
+    lottery.startLottery({"from": account})
+    lottery.enter({"from": get_account(), "value": lottery.getEntanceFee()})
+    lottery.enter({"from": get_account(1), "value": lottery.getEntanceFee()})
+    lottery.enter({"from": get_account(2), "value": lottery.getEntanceFee()})
+    fund_with_link(lottery)
+    tx = lottery.endLottery({"from": account})
+
+    request_id = tx.events["RequestedRandomness"]["requestId"]
+    STATIC_RNG = 666
+    start_balance_account = account.balance() # 8:10 may have bugs
+    start_balance_lottery = lottery.balance()
+    get_contract("vrf_coordinator").callBackWithRandomness(
+        request_id, STATIC_RNG, lottery.address, {"from": account}
+    )
+    assert lottery.winner() == account
+    assert lottery.balance() == 0
+    assert account.balance() == start_balance_account + start_balance_lottery
+    
+
